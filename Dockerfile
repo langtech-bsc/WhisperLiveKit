@@ -9,11 +9,19 @@ ARG EXTRAS
 ARG HF_PRECACHE_DIR
 ARG HF_TKN_FILE
 
+ENV HF_HOME="/app/tmp/cache/huggingface"
+ENV HF_HUB_CACHE="/app/tmp/cache/huggingface/hub"
+ENV XDG_CACHE_HOME="/app/tmp/cache/huggingface"
+ENV LIBROSA_CACHE_DIR="/app/tmp/librosa_cache"
+ENV NUMBA_CACHE_DIR="/app/tmp/numba_cache"
+ENV HF_HUB_ETAG_TIMEOUT="600"
+ENV HF_HUB_DOWNLOAD_TIMEOUT="600"
+
 # Install system dependencies
-#RUN apt-get update && \
-#    apt-get install -y ffmpeg git && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+   apt-get install -y ffmpeg git && \
+   apt-get clean && \
+   rm -rf /var/lib/apt/lists/*
 
 # 2) Install system dependencies + Python + pip
 RUN apt-get update && \
@@ -47,7 +55,7 @@ RUN if [ -n "$EXTRAS" ]; then \
 #    Note: This only persists for a single, named container. This is 
 #          only for convenience at de/test stage. 
 #          For prod, it is better to use a named volume via host mount/k8s.
-VOLUME ["/root/.cache/huggingface/hub"]
+# VOLUME ["/root/.cache/huggingface/hub"]
 
 # or
 # B) Conditionally copy a local pre-cache from the build context to the 
