@@ -94,9 +94,9 @@ RUN if [ -n "$HF_TKN_FILE" ]; then \
     fi
     
 # Expose port for the transcription server
-EXPOSE 7860
+EXPOSE 8000
 
-ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0", "--port", "7860"]
+ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0"]
 
 # Default args
 CMD ["--model", "tiny.en"]
