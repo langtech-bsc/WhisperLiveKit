@@ -82,7 +82,7 @@ def parse_args():
     parser.add_argument(
         "--task",
         type=str,
-        default="translate",
+        default="transcribe",
         choices=["transcribe", "translate"],
         help="Transcribe or translate.",
     )
