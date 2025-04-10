@@ -321,7 +321,8 @@
 
         const host = window.location.hostname || "localhost";
         const port = window.location.port || "8000";
-        const defaultWebSocketUrl = `ws://${host}:${port}/asr`;
+        // const defaultWebSocketUrl = `ws://${host}:${port}/asr`;
+        const defaultWebSocketUrl = `wss://${host}/asr`;
         websocketInput.value = defaultWebSocketUrl;
         websocketUrl = defaultWebSocketUrl;
 
