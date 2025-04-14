@@ -159,6 +159,21 @@
             color: #333;
         }
 
+        #linesTranslation {
+            margin: 20px auto;
+            max-width: 700px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        #linesTranslation p {
+            margin: 0px 0;
+        }
+
+        #linesTranslation strong {
+            color: #333;
+        }
+
         #speaker {
             border: 1px solid rgb(229, 229, 229);
             border-radius: 100px;
@@ -291,6 +306,7 @@
 
     <!-- Speaker-labeled transcript -->
     <div id="linesTranscript"></div>
+    <div id="linesTranslation"></div>
 
     <script>
         let isRecording = false;
@@ -317,13 +333,13 @@
         const chunkSelector = document.getElementById("chunkSelector");
         const websocketInput = document.getElementById("websocketInput");
         const linesTranscriptDiv = document.getElementById("linesTranscript");
+        const linesTranslationDiv = document.getElementById("linesTranslation");
         const timerElement = document.querySelector(".timer");
 
         const host = window.location.hostname || "localhost";
         const port = window.location.port || "8000";
-        // const defaultWebSocketUrl = `ws://${host}:${port}/asr`;
-        // const defaultWebSocketUrl = `wss://${host}/asr`;
-        const defaultWebSocketUrl = `ws://${host}:${port}/asr`;
+         // const defaultWebSocketUrl = `ws://${host}:${port}/asr`;
+        const defaultWebSocketUrl = `wss://${host}/asr`;
         websocketInput.value = defaultWebSocketUrl;
         websocketUrl = defaultWebSocketUrl;
 
@@ -417,6 +433,14 @@
                         remaining_time_diarization,
                         remaining_time_transcription
                     );
+                    renderLinesWithBufferUpper(
+                        lines, 
+                        buffer_diarization,
+                        buffer_transcription,
+                        remaining_time_diarization,
+                        remaining_time_transcription
+                    );
+
                 };
             });
         }
@@ -458,6 +482,44 @@
             }).join("");
 
             linesTranscriptDiv.innerHTML = linesHtml;
+        }
+
+        function renderLinesWithBufferUpper(lines, buffer_diarization, buffer_transcription, remaining_time_diarization, remaining_time_transcription) {
+            const linesHtml = lines.map((item, idx) => {
+                let timeInfo = "";
+                if (item.beg !== undefined && item.end !== undefined) {
+                    timeInfo = ` ${item.beg} - ${item.end}`;
+                }
+
+                let speakerLabel = "";
+                if (item.speaker === -2) {
+                    speakerLabel = `<span class="silence">Silence<span id='timeInfo'>${timeInfo}</span></span>`;
+                } else if (item.speaker == 0) {
+                    speakerLabel = `<span class='loading'><span class="spinner"></span><span id='timeInfo'>${remaining_time_diarization} second(s) of audio are undergoing diarization</span></span>`;
+                } else if (item.speaker == -1) {
+                    speakerLabel = `<span id="speaker"><span id='timeInfo'>${timeInfo}</span></span>`;
+                } else if (item.speaker !== -1) {
+                    speakerLabel = `<span id="speaker">Speaker ${item.speaker}<span id='timeInfo'>${timeInfo}</span></span>`;
+                }
+
+                let textContent = item.text.toUpperCase();
+                if (idx === lines.length - 1) {
+                    speakerLabel += `<span class="label_transcription"><span class="spinner"></span>Transcription lag <span id='timeInfo'>${remaining_time_transcription}s</span></span>`
+                }
+                if (idx === lines.length - 1 && buffer_diarization) {
+                    speakerLabel += `<span class="label_diarization"><span class="spinner"></span>Diarization lag<span id='timeInfo'>${remaining_time_diarization}s</span></span>`
+                    textContent += `<span class="buffer_diarization">${buffer_diarization}</span>`;
+                }
+                if (idx === lines.length - 1) {
+                    textContent += `<span class="buffer_transcription">${buffer_transcription}</span>`;
+                }
+                
+                return textContent
+                    ? `<p>${speakerLabel}<br/><div class='textcontent'>${textContent}</div></p>`
+                    : `<p>${speakerLabel}<br/></p>`;
+            }).join("");
+
+            linesTranslationDiv.innerHTML = linesHtml;
         }
 
         function updateTimer() {
