@@ -16,6 +16,7 @@ setup(
         "faster-whisper",
         "uvicorn",
         "websockets",
+        "pyonmttok"
     ],
     extras_require={
         "diarization": ["diart"],
