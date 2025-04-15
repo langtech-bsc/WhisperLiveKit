@@ -397,7 +397,8 @@ class AudioProcessor:
                         "text": "",
                         "beg": format_time(0),
                         "end": format_time(tokens[-1].end if tokens else 0),
-                        "diff": 0
+                        "diff": 0,
+                        "translation": ""
                     }]
                 
                 response = {
@@ -529,7 +530,7 @@ class AudioProcessor:
         translated = self.translator.translate_batch([tokenized[0]])
 
         translated_text = self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
-        logger.info(f"Translated text: {translated_text}")
+        logger.info(f"Translated text {translated_text}")
         return translated_text
 
         
