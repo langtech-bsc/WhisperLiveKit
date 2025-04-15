@@ -7,6 +7,7 @@ from argparse import Namespace, ArgumentParser
 import ctranslate2
 import pyonmttok
 from huggingface_hub import snapshot_download
+from pprint import pprint
 
 def parse_args():
     parser = ArgumentParser(description="Whisper FastAPI Online Server")
@@ -64,6 +65,13 @@ def parse_args():
         help="Name size of the Whisper model to use (default: tiny). Suggested values: tiny.en,tiny,base.en,base,small.en,small,medium.en,medium,large-v1,large-v2,large-v3,large,large-v3-turbo. The model is automatically downloaded from the model hub if not present in model cache dir.",
     )
     
+    parser.add_argument(
+        "--model_cascaded_translation",
+        type=str,
+        default=None,
+        help="Name of the model for cascaded translation from transcription output. Tested values: projecte-aina/aina-translator-ca-es. The model is automatically downloaded from the model hub if not present in model cache dir.",
+    )
+
     parser.add_argument(
         "--model_cache_dir",
         type=str,
@@ -141,7 +149,7 @@ def parse_args():
     args.vad = not args.no_vad    
     delattr(args, 'no_transcription')
     delattr(args, 'no_vad')
-    
+
     return args
 
 class WhisperLiveKit:
@@ -162,6 +170,8 @@ class WhisperLiveKit:
         merged_args = {**default_args, **kwargs}
         
         self.args = Namespace(**merged_args)
+
+        pprint(vars(self.args))
         
         self.asr = None
         self.tokenizer = None
@@ -172,9 +182,11 @@ class WhisperLiveKit:
             warmup_asr(self.asr, self.args.warmup_file)
 
             # translate from transcription
-            model_dir = snapshot_download(repo_id="projecte-aina/aina-translator-ca-es", revision="main")
-            self.translation_tokenizer = pyonmttok.Tokenizer(mode="none", sp_model_path=model_dir + "/spm.model")
-            self.translator = ctranslate2.Translator(model_dir)
+            if self.args.model_cascaded_translation:
+                print(f"Loading translation model: {self.args.model_cascaded_translation}")
+                model_dir = snapshot_download(repo_id=self.args.model_cascaded_translation, revision="main")
+                self.translation_tokenizer = pyonmttok.Tokenizer(mode="none", sp_model_path=model_dir + "/spm.model")
+                self.translator = ctranslate2.Translator(model_dir)
 
         if self.args.diarization:
             from whisperlivekit.diarization.diarization_online import DiartDiarization
