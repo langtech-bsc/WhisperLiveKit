@@ -4,6 +4,10 @@ except ImportError:
     from .whisper_streaming_custom.whisper_online import backend_factory, warmup_asr
 from argparse import Namespace, ArgumentParser
 
+import ctranslate2
+import pyonmttok
+from huggingface_hub import snapshot_download
+
 def parse_args():
     parser = ArgumentParser(description="Whisper FastAPI Online Server")
     parser.add_argument(
@@ -166,6 +170,11 @@ class WhisperLiveKit:
         if self.args.transcription:
             self.asr, self.tokenizer = backend_factory(self.args)
             warmup_asr(self.asr, self.args.warmup_file)
+
+            # translate from transcription
+            model_dir = snapshot_download(repo_id="projecte-aina/aina-translator-ca-es", revision="main")
+            self.translation_tokenizer = pyonmttok.Tokenizer(mode="none", sp_model_path=model_dir + "/spm.model")
+            self.translator = ctranslate2.Translator(model_dir)
 
         if self.args.diarization:
             from whisperlivekit.diarization.diarization_online import DiartDiarization
