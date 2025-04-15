@@ -62,6 +62,10 @@ class AudioProcessor:
         self.transcription_queue = asyncio.Queue() if self.args.transcription else None
         self.diarization_queue = asyncio.Queue() if self.args.diarization else None
         self.pcm_buffer = bytearray()
+
+        # added for translation from transcription
+        self.translation_tokenizer = models.translation_tokenizer
+        self.translator = models.translator
         
         # Initialize transcription engine if enabled
         if self.args.transcription:
@@ -368,13 +372,15 @@ class AudioProcessor:
                             "text": token.text,
                             "beg": format_time(token.start),
                             "end": format_time(token.end),
-                            "diff": round(token.end - last_end_diarized, 2)
+                            "diff": round(token.end - last_end_diarized, 2),
+                            "translation": self.translate_text(text = token.text)
                         })
                         previous_speaker = speaker
                     elif token.text:  # Only append if text isn't empty
                         lines[-1]["text"] += sep + token.text
                         lines[-1]["end"] = format_time(token.end)
                         lines[-1]["diff"] = round(token.end - last_end_diarized, 2)
+                        lines[-1]["translation"] = self.translate_text(text = lines[-1]["text"])
                 
                 # Handle undiarized text
                 if undiarized_text:
@@ -509,3 +515,16 @@ class AudioProcessor:
                     logger.error("Maximum retries reached for FFmpeg process")
                     await self.restart_ffmpeg()
                     return
+
+    async def translate_text(self, text: str) -> str:
+        """Translate recognized text to the target language."""
+        if not hasattr(self, "translation_tokenizer") or not hasattr(self, "translator"):
+            logger.warning("Translation model is not loaded. Skipping translation.")
+            return text
+
+        # Tokenize, translate, and detokenize
+        tokenized = self.translation_tokenizer.tokenize(text)
+        translated = self.translator.translate_batch([tokenized[0]])
+        return self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
+
+        
