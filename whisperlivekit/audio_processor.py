@@ -516,15 +516,20 @@ class AudioProcessor:
                     await self.restart_ffmpeg()
                     return
 
-    async def translate_text(self, text: str) -> str:
+    def translate_text(self, text: str) -> str:
         """Translate recognized text to the target language."""
         if not hasattr(self, "translation_tokenizer") or not hasattr(self, "translator"):
             logger.warning("Translation model is not loaded. Skipping translation.")
             return text
 
+        logger.info(f"Translating text: {text}")
+
         # Tokenize, translate, and detokenize
         tokenized = self.translation_tokenizer.tokenize(text)
         translated = self.translator.translate_batch([tokenized[0]])
-        return self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
+
+        translated_text = self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
+        logger.info(f"Translated text: {translated_text}")
+        return translated_text
 
         
