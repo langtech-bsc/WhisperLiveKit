@@ -37,7 +37,7 @@ class AudioProcessor:
         self.samples_per_sec = int(self.sample_rate * self.args.min_chunk_size)
         self.bytes_per_sample = 2
         self.bytes_per_sec = self.samples_per_sec * self.bytes_per_sample
-        self.max_bytes_per_sec = 32000 * 5  # 5 seconds of audio at 32 kHz
+        self.max_bytes_per_sec = 32000 * 5 # int(32000 * 5 * 1.5)  # 5 seconds of audio at 32 kHz
         self.last_ffmpeg_activity = time()
         self.ffmpeg_health_check_interval = 5
         self.ffmpeg_max_idle_time = 10
@@ -373,14 +373,14 @@ class AudioProcessor:
                             "beg": format_time(token.start),
                             "end": format_time(token.end),
                             "diff": round(token.end - last_end_diarized, 2),
-                            "translation": self.translate_text(text = token.text)
+                            "translation": await self.translate_text(text = token.text)
                         })
                         previous_speaker = speaker
                     elif token.text:  # Only append if text isn't empty
                         lines[-1]["text"] += sep + token.text
                         lines[-1]["end"] = format_time(token.end)
                         lines[-1]["diff"] = round(token.end - last_end_diarized, 2)
-                        lines[-1]["translation"] = self.translate_text(text = lines[-1]["text"])
+                        lines[-1]["translation"] = await self.translate_text(text = lines[-1]["text"])
                 
                 # Handle undiarized text
                 if undiarized_text:
@@ -517,20 +517,21 @@ class AudioProcessor:
                     await self.restart_ffmpeg()
                     return
 
-    def translate_text(self, text: str) -> str:
+    async def translate_text(self, text: str) -> str:
         """Translate recognized text to the target language."""
-        if not hasattr(self, "translation_tokenizer") or not hasattr(self, "translator"):
-            logger.warning("Translation model is not loaded. Skipping translation.")
-            return text
+        if False:
+            if not hasattr(self, "translation_tokenizer") or not hasattr(self, "translator"):
+                logger.warning("Translation model is not loaded. Skipping translation.")
+                return text
 
-        logger.info(f"Translating text: {text}")
+            # Tokenize, translate, and detokenize
+            tokenized = self.translation_tokenizer.tokenize(text)
+            translated = self.translator.translate_batch([tokenized[0]])
 
-        # Tokenize, translate, and detokenize
-        tokenized = self.translation_tokenizer.tokenize(text)
-        translated = self.translator.translate_batch([tokenized[0]])
+            translated_text = self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
+        else:
+            translated_text = "transcription: " + text.upper()
 
-        translated_text = self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
-        logger.info(f"Translated text {translated_text}")
         return translated_text
 
         
