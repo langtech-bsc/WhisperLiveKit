@@ -95,7 +95,7 @@ class FasterWhisperASR(ASRBase):
     sep = ""
 
     def load_model(self, modelsize=None, cache_dir=None, model_dir=None):
-        from faster_whisper import WhisperModel
+        from faster_whisper import WhisperModel, BatchedInferencePipeline
 
         if model_dir is not None:
             logger.debug(f"Loading whisper model from model_dir {model_dir}. "
@@ -115,7 +115,9 @@ class FasterWhisperASR(ASRBase):
             compute_type=compute_type,
             download_root=cache_dir,
         )
-        return model
+        batched_model = BatchedInferencePipeline(model=model)
+        return batched_model
+        #return model
 
     def transcribe(self, audio: np.ndarray, init_prompt: str = "") -> list:
         segments, info = self.model.transcribe(
@@ -125,6 +127,7 @@ class FasterWhisperASR(ASRBase):
             beam_size=5,
             word_timestamps=True,
             condition_on_previous_text=True,
+            batch_size=16,
             **self.transcribe_kargs,
         )
         return list(segments)
@@ -148,6 +151,60 @@ class FasterWhisperASR(ASRBase):
     def set_translate_task(self):
         self.transcribe_kargs["task"] = "translate"
 
+class WhisperXASR(ASRBase):
+    """Uses whisperX as the backend."""
+    sep = ""
+
+    def load_model(self, modelsize=None, cache_dir=None, model_dir=None):
+        import whisperx
+        
+        if model_dir is not None:
+            logger.debug(f"Loading whisper model from model_dir {model_dir}. "
+                         f"modelsize and cache_dir parameters are not used.")
+            model_size_or_path = model_dir
+        elif modelsize is not None:
+            model_size_or_path = modelsize
+        else:
+            raise ValueError("Either modelsize or model_dir must be set")
+        device = "cuda" # Allow CTranslate2 to decide available device
+        compute_type = "int8" # Allow CTranslate2 to decide faster compute type
+                              
+        import torch
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+
+        model = whisperx.load_model(model_size_or_path, device, compute_type=compute_type)
+
+        return model
+
+    def transcribe(self, audio: np.ndarray, init_prompt: str = "") -> list:
+        segments, info = self.model.transcribe(
+            audio,
+            language=self.original_language,
+            batch_size=8,
+            **self.transcribe_kargs,
+        )
+        return list(segments)
+
+    def ts_words(self, segments) -> List[ASRToken]:
+        tokens = []
+        for segment in segments:
+            if segment.no_speech_prob > 0.9:
+                continue
+            for word in segment.words:
+                token = ASRToken(word.start, word.end, word.word, probability=word.probability)
+                tokens.append(token)
+        return tokens
+
+    def segments_end_ts(self, segments) -> List[float]:
+        return [segment.end for segment in segments]
+
+    def use_vad(self):
+        pass
+        # self.transcribe_kargs["vad_filter"] = True
+
+    def set_translate_task(self):
+        self.transcribe_kargs["task"] = "translate"
 
 class MLXWhisper(ASRBase):
     """
