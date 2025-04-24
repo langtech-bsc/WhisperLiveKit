@@ -186,7 +186,7 @@ class WhisperLiveKit:
                 print(f"Loading translation model: {self.args.model_cascaded_translation}")
                 model_dir = snapshot_download(repo_id=self.args.model_cascaded_translation, revision="main")
                 self.translation_tokenizer = pyonmttok.Tokenizer(mode="none", sp_model_path=model_dir + "/spm.model")
-                self.translator = ctranslate2.Translator(model_dir)
+                self.translator = ctranslate2.Translator(model_dir, device = "cpu")
 
         if self.args.diarization:
             from whisperlivekit.diarization.diarization_online import DiartDiarization
