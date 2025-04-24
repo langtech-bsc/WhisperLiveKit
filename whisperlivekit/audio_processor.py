@@ -380,7 +380,7 @@ class AudioProcessor:
                         lines[-1]["text"] += sep + token.text
                         lines[-1]["end"] = format_time(token.end)
                         lines[-1]["diff"] = round(token.end - last_end_diarized, 2)
-                        lines[-1]["translation"] = await self.translate_text(text = lines[-1]["text"])
+                        lines[-1]["translation"] += sep + await self.translate_text(text = token.text)
                 
                 # Handle undiarized text
                 if undiarized_text:
