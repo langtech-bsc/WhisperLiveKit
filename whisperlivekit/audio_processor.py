@@ -519,7 +519,7 @@ class AudioProcessor:
 
     async def translate_text(self, text: str) -> str:
         """Translate recognized text to the target language."""
-        if True:
+        if False:
             if not hasattr(self, "translation_tokenizer") or not hasattr(self, "translator"):
                 logger.warning("Translation model is not loaded. Skipping translation.")
                 return text
@@ -530,7 +530,7 @@ class AudioProcessor:
 
             translated_text = self.translation_tokenizer.detokenize(translated[0].hypotheses[0])
         else:
-            translated_text = "transcription: " + text.upper()
+            translated_text = "here goes the translated text" # "transcription: " + text.upper()
 
         return translated_text
 
