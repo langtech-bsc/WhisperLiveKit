@@ -104,7 +104,7 @@ ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0"]
 #      "--model_cascaded_translation", "projecte-aina/aina-translator-ca-es", \
 #      "--buffer_trimming_sec", "2"]
 #CMD ["--model", "projecte-aina/faster-whisper-large-v3-ca-3catparla", "--language", "ca"]
-CMD ["--model", "large-v2", \
-     "--language", "es", \
-     "--model_cascaded_translation", "projecte-aina/aina-translator-es-ca", \
+CMD ["--model", "large-v3", \
+     "--language", "ca", \
+     "--model_cascaded_translation", "projecte-aina/aina-translator-ca-es", \
      "--buffer_trimming_sec", "2"]
