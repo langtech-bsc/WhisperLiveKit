@@ -103,4 +103,3 @@ CMD ["--model", "projecte-aina/faster-whisper-large-v3-tiny-caesar", \
      "--language", "ca", \
      "--model_cascaded_translation", "projecte-aina/aina-translator-ca-es", \
      "--buffer_trimming_sec", "2"]
-#CMD ["--model", "projecte-aina/faster-whisper-large-v3-ca-3catparla", "--language", "ca"]
