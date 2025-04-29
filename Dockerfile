@@ -99,7 +99,7 @@ EXPOSE 8000
 ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0"]
 
 # Default args
-CMD ["--model", "projecte-aina/faster-whisper-large-v3-ca-3catparla", \
+CMD ["--model", "projecte-aina/faster-whisper-large-v3-tiny-caesar", \
      "--language", "ca", \
      "--model_cascaded_translation", "projecte-aina/aina-translator-ca-es", \
      "--buffer_trimming_sec", "2"]
