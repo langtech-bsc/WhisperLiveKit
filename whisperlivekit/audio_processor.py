@@ -373,15 +373,19 @@ class AudioProcessor:
                             "beg": format_time(token.start),
                             "end": format_time(token.end),
                             "diff": round(token.end - last_end_diarized, 2),
-                            "translation": await self.translate_text(text = token.text)
+                            "translation": ""
+                            #"translation": await self.translate_text(text = token.text)
                         })
                         previous_speaker = speaker
                     elif token.text:  # Only append if text isn't empty
                         lines[-1]["text"] += sep + token.text
                         lines[-1]["end"] = format_time(token.end)
                         lines[-1]["diff"] = round(token.end - last_end_diarized, 2)
-                        lines[-1]["translation"] += " " + await self.translate_text(text = token.text)
+                        lines[-1]["translation"] = ""
+                        #lines[-1]["translation"] += " " + await self.translate_text(text = token.text)
                 
+                text_to_translate = lines[-1]["text"]
+                lines[-1]["translation"] = await self.translate_text(text=text_to_translate) if len(lines) > 0 else ""
                 # Handle undiarized text
                 if undiarized_text:
                     combined = sep.join(undiarized_text)
