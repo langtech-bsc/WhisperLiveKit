@@ -99,7 +99,6 @@ EXPOSE 8000
 ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0"]
 
 # Default args
-# projecte-aina/faster-whisper-large-v3-tiny-caesar
 CMD ["--model", "large-v2", \
      "--language", "ca", \
      "--model_cascaded_translation", "projecte-aina/aina-translator-ca-en", \
