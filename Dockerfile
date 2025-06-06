@@ -101,5 +101,5 @@ ENTRYPOINT ["whisperlivekit-server", "--host", "0.0.0.0"]
 # Default args
 CMD ["--model", "projecte-aina/faster-whisper-large-v3-tiny-caesar", \
      "--language", "ca", \
-     "--model_cascaded_translation", "projecte-aina/aina-translator-ca-es", \
+     "--model_cascaded_translation", "projecte-aina/aina-translator-ca-en", \
      "--buffer_trimming_sec", "2"]
