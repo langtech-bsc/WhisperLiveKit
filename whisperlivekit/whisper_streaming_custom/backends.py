@@ -92,7 +92,7 @@ class WhisperTimestampedASR(ASRBase):
 
 class FasterWhisperASR(ASRBase):
     """Uses faster-whisper as the backend."""
-    sep = ""
+    sep = " "
 
     def load_model(self, modelsize=None, cache_dir=None, model_dir=None):
         from faster_whisper import WhisperModel, BatchedInferencePipeline
