@@ -384,8 +384,11 @@ class AudioProcessor:
                         lines[-1]["translation"] = ""
                         #lines[-1]["translation"] += " " + await self.translate_text(text = token.text)
                 
-                text_to_translate = lines[-1]["text"]
-                lines[-1]["translation"] = await self.translate_text(text=text_to_translate) if len(lines) > 0 else ""
+                text_to_translate = ""
+                if lines:
+                    text_to_translate = lines[-1]["text"]
+                    lines[-1]["translation"] = await self.translate_text(text=text_to_translate) if len(lines) > 0 else ""
+                
                 # Handle undiarized text
                 if undiarized_text:
                     combined = sep.join(undiarized_text)
