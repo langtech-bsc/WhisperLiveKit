@@ -142,6 +142,16 @@ def parse_args():
         help="Set the log level",
         default="DEBUG",
     )
+    parser.add_argument(
+        "--simulation-file",
+        type=str,
+        default=None,
+        dest="simulation_file",
+        help="""
+        The path to a speech audio wav file to simulate live transcription instead of using mic input.
+        If False, no simulation is performed.
+        """,
+    )
 
     args = parser.parse_args()
     

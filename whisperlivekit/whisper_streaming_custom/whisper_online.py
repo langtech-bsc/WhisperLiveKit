@@ -5,7 +5,7 @@ import librosa
 from functools import lru_cache
 import time
 import logging
-from .backends import FasterWhisperASR, MLXWhisper, WhisperTimestampedASR, OpenaiApiASR
+from .backends import FasterWhisperASR, MLXWhisper, WhisperTimestampedASR, OpenaiApiASR, WhisperXASR
 from .online_asr import OnlineASRProcessor, VACOnlineASRProcessor
 
 logger = logging.getLogger(__name__)
@@ -74,13 +74,15 @@ def backend_factory(args):
             asr_cls = FasterWhisperASR
         elif backend == "mlx-whisper":
             asr_cls = MLXWhisper
+        elif backend == "whisper-x":
+            asr_cls = WhisperXASR
         else:
             asr_cls = WhisperTimestampedASR
 
         # Only for FasterWhisperASR and WhisperTimestampedASR
         size = args.model
         t = time.time()
-        logger.info(f"Loading Whisper {size} model for language {args.lan}...")
+        logger.info(f"Loading {backend} backend {size} model for language {args.lan}...")
         asr = asr_cls(
             modelsize=size,
             lan=args.lan,
